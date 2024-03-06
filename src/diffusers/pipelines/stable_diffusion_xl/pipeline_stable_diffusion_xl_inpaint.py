@@ -948,14 +948,13 @@ class StableDiffusionXLInpaintPipeline(
             latents_std = (
                 torch.tensor(self.vae.config.latents_std).view(1, 4, 1, 1).to(image_latents.device, image_latents.dtype)
             )
-            image_latents = image_latents * latents_std / self.vae.config.scaling_factor + latents_mean
-        else:
-            image_latents = image_latents / self.vae.config.scaling_factor
+            image_latents = (image_latents - latents_mean) / latents_std
 
         if self.vae.config.force_upcast:
             self.vae.to(dtype)
 
         image_latents = image_latents.to(dtype)
+        image_latents = self.vae.config.scaling_factor * image_latents
 
         return image_latents
 
